@@ -6,7 +6,7 @@ services:
       - 8000:8000
     build:
       context: ./saleor
-      dockerfile: ./Dockerfile
+      dockerfile: ./Dockerfile.dev
       args:
         STATIC_URL: '/static/'
     restart: unless-stopped
@@ -25,7 +25,11 @@ services:
       - /app/templates/templated_email/compiled
       # shared volume between celery and web for media
       - saleor-media:/app/media
-    command: python manage.py runserver 0.0.0.0:8000
+    command: >
+      sh -c "python manage.py collectstatic --noinput &&
+              python manage.py migrate --noinput &&
+              python manage.py populatedb --createsuperuser &&
+              gunicorn saleor.wsgi:application -w 4 -b :8000 --reload"
     env_file: ./saleor/local.env
     environment:
       - JAEGER_AGENT_HOST=jaeger
@@ -80,14 +84,14 @@ services:
   celery:
     build:
       context: ./saleor
-      dockerfile: ./Dockerfile
+      dockerfile: ./Dockerfile.dev
       args:
         STATIC_URL: '/static/'
     command: celery -A saleor worker --app=saleor.celeryconf:app --loglevel=info
     restart: unless-stopped
     networks:
       - saleor-backend-tier
-    env_file: ./saleor/common.env
+    env_file: ./saleor/local.env
     depends_on:
       - redis
     volumes:
