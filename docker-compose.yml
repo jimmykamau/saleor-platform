@@ -28,7 +28,6 @@ services:
     command: >
       sh -c "python manage.py collectstatic --noinput &&
               python manage.py migrate --noinput &&
-              python manage.py populatedb --createsuperuser &&
               gunicorn saleor.wsgi:application -w 4 -b :8000 --reload"
     env_file: ./saleor/local.env
     environment:
@@ -68,7 +67,7 @@ services:
     networks:
       - saleor-backend-tier
     volumes:
-      - saleor-db:/var/lib/postgresql
+      - saleor-db:/var/lib/postgresql/data/
     environment:
       - POSTGRES_USER=saleor
       - POSTGRES_PASSWORD=saleor
@@ -89,7 +88,7 @@ services:
       dockerfile: ./Dockerfile.dev
       args:
         STATIC_URL: '/static/'
-    command: celery -A saleor worker --app=saleor.celeryconf:app --loglevel=info
+    command: celery -A saleor worker --app=saleor.celeryconf:app --loglevel=info --uid=saleor
     restart: unless-stopped
     networks:
       - saleor-backend-tier
