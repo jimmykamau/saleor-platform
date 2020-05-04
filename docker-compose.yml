@@ -25,10 +25,6 @@ services:
       - /app/templates/templated_email/compiled
       # shared volume between worker and api for media
       - saleor-media:/app/media
-    command: >
-      sh -c "python manage.py collectstatic --noinput &&
-              python manage.py migrate --noinput &&
-              gunicorn saleor.wsgi:application -w 4 -b :8000 --reload"
     env_file: ./saleor/local.env
     environment:
       - JAEGER_AGENT_HOST=jaeger
@@ -55,6 +51,7 @@ services:
     volumes:
       - ./saleor-dashboard/:/app:cached
       - /app/node_modules/
+    env_file: ./saleor-dashboard/local.env
     command: npm start -- --host 0.0.0.0
 
   db:
