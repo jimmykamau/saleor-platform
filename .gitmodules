@@ -1,9 +1,12 @@
 [submodule "saleor"]
 	path = saleor
 	url = https://github.com/jimmykamau/saleor.git
+	branch = release
 [submodule "saleor-storefront"]
 	path = saleor-storefront
 	url = https://github.com/jimmykamau/saleor-storefront.git
+	branch = release
 [submodule "saleor-dashboard"]
 	path = saleor-dashboard
 	url = https://github.com/jimmykamau/saleor-dashboard.git
+	branch = release
