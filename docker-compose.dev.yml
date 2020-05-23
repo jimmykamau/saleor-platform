@@ -1,0 +1,37 @@
+version: '3.8'
+
+services: 
+  api:
+    build:
+      context: ./saleor
+      dockerfile: ./Dockerfile.dev
+  
+  storefront:
+    build: 
+      context: ./saleor-storefront
+      dockerfile: ./Dockerfile.dev
+    ports: 
+      - 3000:3000
+    restart: unless-stopped
+    command: npm start -- --host 0.0.0.0
+    volumes:
+      - ./saleor-storefront/:/app:cached
+      - /app/node_modules/
+  
+  dashboard:
+    build:
+      context: ./saleor-dashboard
+      dockerfile: ./Dockerfile.dev
+    ports:
+      - 9000:9000
+    restart: unless-stopped
+    volumes:
+      - ./saleor-dashboard/:/app:cached
+      - /app/node_modules/
+    env_file: ./saleor-dashboard/local.env
+    command: npm start -- --host 0.0.0.0
+  
+  worker:
+    build:
+      context: ./saleor
+      dockerfile: ./Celery.Dockerfile

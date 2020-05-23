@@ -1,12 +1,10 @@
-version: '2'
+version: '3.8'
 
 services:
   api:
     ports:
       - 8000:8000
     build:
-      context: ./saleor
-      dockerfile: ./Dockerfile.dev
       args:
         STATIC_URL: '/static/'
     restart: unless-stopped
@@ -25,40 +23,11 @@ services:
       - /app/templates/templated_email/compiled
       # shared volume between worker and api for media
       - saleor-media:/app/media
-    command: >
-      sh -c "python manage.py collectstatic --noinput &&
-              python manage.py migrate --noinput &&
-              python manage.py populatedb --createsuperuser &&
-              gunicorn saleor.wsgi:application -w 4 -b :8000 --reload"
     env_file: ./saleor/local.env
     environment:
       - JAEGER_AGENT_HOST=jaeger
       - STOREFRONT_URL=http://localhost:3000/
-      - DASHBOARD_URL=http://localhost:9000/
-
-  storefront:
-    build:
-      context: ./saleor-storefront
-      dockerfile: ./Dockerfile.dev
-    ports:
-      - 3000:3000
-    restart: unless-stopped
-    volumes:
-      - ./saleor-storefront/:/app:cached
-      - /app/node_modules/
-    command: npm start -- --host 0.0.0.0
-
-  dashboard:
-    build:
-      context: ./saleor-dashboard
-      dockerfile: ./Dockerfile.dev
-    ports:
-      - 9000:9000
-    restart: unless-stopped
-    volumes:
-      - ./saleor-dashboard/:/app:cached
-      - /app/node_modules/
-    command: npm start -- --host 0.0.0.0
+      - DASHBOARD_URL=http://localhost:9000/  
 
   db:
     image: library/postgres:11.1-alpine
@@ -68,7 +37,7 @@ services:
     networks:
       - saleor-backend-tier
     volumes:
-      - saleor-db:/var/lib/postgresql
+      - saleor-db:/var/lib/postgresql/data/
     environment:
       - POSTGRES_USER=saleor
       - POSTGRES_PASSWORD=saleor
@@ -85,11 +54,8 @@ services:
 
   worker:
     build:
-      context: ./saleor
-      dockerfile: ./Dockerfile.dev
       args:
         STATIC_URL: '/static/'
-    command: celery -A saleor worker --app=saleor.celeryconf:app --loglevel=info
     restart: unless-stopped
     networks:
       - saleor-backend-tier
