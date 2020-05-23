@@ -1,12 +1,10 @@
-version: '2'
+version: '3.8'
 
 services:
   api:
     ports:
       - 8000:8000
     build:
-      context: ./saleor
-      dockerfile: ./Dockerfile.dev
       args:
         STATIC_URL: '/static/'
     restart: unless-stopped
@@ -29,32 +27,7 @@ services:
     environment:
       - JAEGER_AGENT_HOST=jaeger
       - STOREFRONT_URL=http://localhost:3000/
-      - DASHBOARD_URL=http://localhost:9000/
-
-  storefront:
-    build:
-      context: ./saleor-storefront
-      dockerfile: ./Dockerfile.dev
-    ports:
-      - 3000:3000
-    restart: unless-stopped
-    volumes:
-      - ./saleor-storefront/:/app:cached
-      - /app/node_modules/
-    command: npm start -- --host 0.0.0.0
-
-  dashboard:
-    build:
-      context: ./saleor-dashboard
-      dockerfile: ./Dockerfile.dev
-    ports:
-      - 9000:9000
-    restart: unless-stopped
-    volumes:
-      - ./saleor-dashboard/:/app:cached
-      - /app/node_modules/
-    env_file: ./saleor-dashboard/local.env
-    command: npm start -- --host 0.0.0.0
+      - DASHBOARD_URL=http://localhost:9000/  
 
   db:
     image: library/postgres:11.1-alpine
@@ -81,11 +54,8 @@ services:
 
   worker:
     build:
-      context: ./saleor
-      dockerfile: ./Dockerfile.dev
       args:
         STATIC_URL: '/static/'
-    command: celery -A saleor worker --app=saleor.celeryconf:app --loglevel=info --uid=saleor
     restart: unless-stopped
     networks:
       - saleor-backend-tier
