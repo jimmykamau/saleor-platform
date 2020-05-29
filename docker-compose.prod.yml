@@ -5,31 +5,18 @@ services:
     build:
       context: ./saleor
       dockerfile: ./Dockerfile
-    ports: 
-      - 8000:8000
-  
-  storefront:
-    build: 
-      context: ./saleor-storefront
-      dockerfile: ./Dockerfile
-      args: 
-        API_URI: http://localhost:8000/graphql/
-    ports: 
-      - 80:80
-    env_file: ./saleor-storefront/local.env
-  
-  dashboard:
-    build:
-      context: ./saleor-dashboard
-      dockerfile: ./Dockerfile
-      args:
-        API_URI: http://localhost:8000/graphql/
-        APP_MOUNT_URI: /dashboard/
-    ports:
-      - 9000:80
-    env_file: ./saleor-dashboard/local.env
   
   worker:
     build:
       context: ./saleor
       dockerfile: ./Celery.Dockerfile
+  
+  nginx:
+    build:
+      context: ./saleor-nginx
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - saleor-tmp:/tmp
