@@ -23,6 +23,8 @@ services:
       - /app/templates/templated_email/compiled
       # shared volume between worker and api for media
       - saleor-media:/app/media
+      # shared tmp file for NGINX
+      - saleor-tmp:/tmp
     env_file: ./saleor/local.env
     environment:
       - JAEGER_AGENT_HOST=jaeger
@@ -90,6 +92,7 @@ volumes:
   saleor-redis:
     driver: local
   saleor-media:
+  saleor-tmp:
 
 networks:
   saleor-backend-tier:
