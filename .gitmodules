@@ -10,3 +10,7 @@
 	path = saleor-dashboard
 	url = https://github.com/jimmykamau/saleor-dashboard.git
 	branch = release
+[submodule "saleor-nginx"]
+	path = saleor-nginx
+	url = https://github.com/jimmykamau/saleor-nginx.git
+	branch = release
