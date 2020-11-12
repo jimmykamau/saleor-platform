@@ -17,6 +17,8 @@ services:
     volumes:
       - ./saleor-storefront/:/app:cached
       - /app/node_modules/
+    networks: 
+      - saleor-frontend-tier
   
   dashboard:
     build:
@@ -30,8 +32,30 @@ services:
       - /app/node_modules/
     env_file: ./saleor-dashboard/local.env
     command: npm start -- --host 0.0.0.0
+    networks: 
+      - saleor-frontend-tier
   
   worker:
     build:
       context: ./saleor
       dockerfile: ./Celery.Dockerfile
+  
+  nginx:
+    build:
+      context: ./saleor-nginx
+      dockerfile: dockerfile.dev
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - saleor-tmp:/tmp
+    networks: 
+      - saleor-frontend-tier
+      - saleor-backend-tier
+    depends_on:
+      - api
+      - storefront
+      - dashboard
+
+networks: 
+  saleor-frontend-tier:
